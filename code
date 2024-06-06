@@ -1,0 +1,58 @@
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+local sprintSpeed = 32 -- speed players go when held down shift
+local walkSpeed = 16 -- normal speed
+
+local function onShiftPressed(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = sprintSpeed
+    end
+end
+
+local function onShiftReleased(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = walkSpeed
+    end
+end
+
+local function setupPlayer(player)
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = walkSpeed
+        end
+    end)
+end
+
+local function onInputBegan(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+        for _, player in Players:GetPlayers() do
+            onShiftPressed(player)
+        end
+    end
+end
+
+local function onInputEnded(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
+        for _, player in Players:GetPlayers() do
+            onShiftReleased(player)
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
+UserInputService.InputEnded:Connect(onInputEnded)
+
+for _, player in Players:GetPlayers() do
+    setupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    setupPlayer(player)
+end)
